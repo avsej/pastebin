@@ -5,8 +5,10 @@ require 'bundler'
 Bundler.require
 
 BASE = "http://paste.avsej.net"
-STORE = File.expand_path("tmp/files", File.dirname(__FILE__))
-FileUtils.mkdir_p(STORE)
+AWS.config('access_key_id' => ENV['AWS_ACCESS_KEY'],
+           'secret_access_key' => ENV['AWS_SECRET_KEY'])
+
+BUCKET = AWS::S3.new.buckets.create("files.avsej.net")
 
 not_found do
   content_type "text/plain"
@@ -35,10 +37,12 @@ post '/~paste' do
     halt 422, "invalid data\n"
   end
   name = SecureRandom.urlsafe_base64(8)
-  File.open(File.join(STORE, name), "w+") do |f|
-    f.write(tmp.read)
-  end
-  redirect to("/#{name}")
+  object = BUCKET.objects["paste/#{name}"]
+  object.write(:file => tmp.path,
+               :reduced_redundancy => true,
+               :acl => :public_read,
+               :content_type => 'text/plain')
+  redirect to("http://files.avsej.net/paste/#{name}")
 end
 
 get '/:name' do
