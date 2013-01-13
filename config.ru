@@ -45,8 +45,4 @@ post '/~paste' do
   redirect to("http://files.avsej.net/paste/#{name}")
 end
 
-get '/:name' do
-  send_file File.join(STORE, params[:name])
-end
-
 run Sinatra::Application
