@@ -24,12 +24,6 @@ before do
   content_type "text/plain"
 end
 
-get '/' do
-  <<-EOT
-curl -v -F data=@/etc/passwd #{BASE}/~paste | grep Location:
-  EOT
-end
-
 post '/~paste' do
   if !params[:data] ||
      !(tmp = params[:data][:tempfile]) ||
@@ -43,6 +37,12 @@ post '/~paste' do
                :acl => :public_read,
                :content_type => 'text/plain')
   redirect to("http://files.avsej.net/paste/#{name}")
+end
+
+get '/*' do
+  <<-EOT
+curl -v -F data=@/etc/passwd #{BASE}/~paste | grep Location:
+  EOT
 end
 
 run Sinatra::Application
