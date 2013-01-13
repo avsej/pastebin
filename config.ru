@@ -41,7 +41,7 @@ end
 
 get '/*' do
   <<-EOT
-curl -v -F data=@/etc/passwd #{BASE}/~paste | grep Location:
+curl -v -F data=@/etc/passwd #{BASE}/~paste 2>&1 | grep Location:
   EOT
 end
 
